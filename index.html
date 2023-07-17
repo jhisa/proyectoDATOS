@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <title>Lista de Perros</title>
+    <style>
+      /* Estilos CSS para la tabla de la lista de perros */
+      table {
+        border-collapse: collapse;
+        width: 100%;
+      }
+      th, td {
+        text-align: left;
+        padding: 8px;
+        border: 1px solid #ddd;
+      }
+      th {
+        background-color: #f2f2f2;
+      }
+      form {
+        margin-bottom: 20px;
+      }
+      input[type="text"] {
+        padding: 8px;
+        border: 1px solid #ddd;
+        margin-right: 10px;
+      }
+      input[type="submit"] {
+        padding: 8px;
+        background-color: #4CAF50;
+        color: white;
+        border: none;
+        cursor: pointer;
+      }
+      button {
+        padding: 8px;
+        background-color: #f44336;
+        color: white;
+        border: none;
+        cursor: pointer;
+        margin-right: 10px;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Lista de Perros</h1>
+    <form id="formulario-perros">
+      <label for="id-perro">ID:</label>
+      <input type="text" id="id-perro" name="id-perro">
+      <label for="raza-perro">Raza:</label>
+      <input type="text" id="raza-perro" name="raza-perro">
+      <label for="peso-perro">Peso:</label>
+      <input type="text" id="peso-perro" name="peso-perro">
+      <input type="submit" value="Agregar">
+    </form>
+    <table id="tabla-perros">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Raza</th>
+          <th>Peso</th>
+          <th>Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+      </tbody>
+    </table>
+    <form id="formulario-actualizar">
+      <h2>Actualizar Perro</h2>
+      <label for="id-actualizar">ID:</label>
+
+<input type="text" id="id-actualizar" name="id-actualizar">
+      <label for="raza-actualizar">Raza:</label>
+      <input type="text" id="raza-actualizar" name="raza-actualizar">
+      <label for="peso-actualizar">Peso:</label>
+      <input type="text" id="peso-actualizar" name="peso-actualizar">
+      <button type="button" onclick="actualizar()">Actualizar</button>
+      <button type="button" onclick="eliminar()">Eliminar</button>
+      <button type="button" onclick="buscar()">Buscar</button>
+    </form>
+    <script>
+      // Código JavaScript para la lista de perros
+      class Perro {
+        constructor(id, raza, peso) {
+          this.id = id;
+          this.raza = raza;
+          this.peso = peso;
+          this.siguiente = null;
+        }
+      }
+
+      class ListaPerros {
+        constructor() {
+          this.cabeza = null;
+        }
+
+        agregar(perro) {
+          if (this.cabeza === null || perro.id < this.cabeza.id) {
+            perro.siguiente = this.cabeza;
+            this.cabeza = perro;
+          } else {
+            let actual = this.cabeza;
+            while (actual.siguiente !== null && actual.siguiente.id < perro.id) {
+              actual = actual.siguiente;
+            }
+            perro.siguiente = actual.siguiente;
+            actual.siguiente = perro;
+          }
+        }
+
+        listar() {
+          let actual = this.cabeza;
+          while (actual !== null) {
+            let fila = document.createElement("tr");
+            let columnaId = document.createElement("td");
+            let columnaRaza = document.createElement("td");
+            let columnaPeso = document.createElement("td");
+            let columnaAcciones = document.createElement("td");
+            let botonEliminar = document.createElement("button");
+            botonEliminar.textContent = "Eliminar";
+            botonEliminar.addEventListener("click", function() {
+              eliminarPerro(actual.id);
+            });
+            let botonActualizar = document.createElement("button");
+            botonActualizar.textContent = "Actualizar";
+            botonActualizar.addEventListener("click", function() {
+              document.querySelector("#id-actualizar").value = actual.id;
+              document.querySelector("#raza-actualizar").value = actual.raza;
+              document.querySelector("#peso-actualizar").value = actual.peso;
+            });
+            columnaId.textContent = actual.id;
+            columnaRaza.textContent = actual.raza;
+            columnaPeso.textContent = actual.peso;
+            columnaAcciones.appendChild(botonEliminar);
+            columnaAcciones.appendChild(botonActualizar);
+            fila.appendChild(columnaId);
+            fila.appendChild(columnaRaza);
+            fila.appendChild(columnaPeso);
+            fila.appendChild(columnaAcciones);
+            document.querySelector("#tabla-perros tbody").appendChild(fila);
+            actual = actual.siguiente;
+          }
+        }
+      }
+
+      let listaPerros = new ListaPerros();
+
+      function actualizarTabla() {
+        document.querySelector("#tabla-perros tbody").innerHTML = "";
+        listaPerros.listar();
+      }
+
+      let formularioAgregar = document.querySelector("#formulario-perros");
+      formularioAgregar.addEventListener("submit", function(evento) {
+        evento.preventDefault();
+        let idPerro = document.querySelector("#id-perro").value;
+        let razaPerro = document.querySelector("#raza-perro").value;
+        let pesoPerro = document.querySelector("#peso-perro").value;
+        let perro = new Perro(idPerro, razaPerro, pesoPerro);
+        listaPerros.agregar(perro);
+        actualizarTabla();
+        formularioAgregar.reset();
+      });
+
+      function eliminar() {
+        let id = document.querySelector("#id-actualizar").value;
+        eliminarPerro(id);
+        document.querySelector("#formulario-actualizar").reset();
+      }
+
+      function buscar() {
+        let id = document.querySelector("#id-actualizar").value;
+        let perro = buscarPerro(id);
+        if (perro !== null) {
+          document.querySelector("#raza-actualizar").value = perro.raza;
+          document.querySelector("#peso-actualizar").value = perro.peso;
+        }
+      }
+
+      function actualizar() {
+        let id = document.querySelector("#id-actualizar").value;
+        let raza = document.querySelector("#raza-actualizar").value;
+        let peso = document.querySelector("#peso-actualizar").value;
+        actualizarPerro(id, raza, peso);
+        document.querySelector("#formulario-actualizar").reset();
+      }
+  ///// funciones agregadas 
+  function eliminarPerro(id) {
+  let actual = listaPerros.cabeza;
+  let anterior = null;
+  while (actual !== null && actual.id != id) {
+    anterior = actual;
+    actual = actual.siguiente;
+  }
+  if (actual === null) {
+    alert("El perro no existe en la lista");
+  } else {
+    if (anterior === null) {
+      listaPerros.cabeza = actual.siguiente;
+    } else {
+      anterior.siguiente = actual.siguiente;
+    }
+    actualizarTabla();
+  }
+}
+
+function buscarPerro(id) {
+  let actual = listaPerros.cabeza;
+  while (actual !== null && actual.id != id) {
+    actual = actual.siguiente;
+  }
+  if (actual === null) {
+    alert("El perro no existe en la lista");
+    return null;
+  } else {
+    return actual;
+  }
+}
+
+function actualizarPerro(id, raza, peso) {
+  let perro = buscarPerro(id);
+  if (perro !== null) {
+    perro.raza = raza;
+    perro.peso = peso;
+    actualizarTabla();
+  }
+}
+
+   
+    </script>
+  </body>
+</html>
